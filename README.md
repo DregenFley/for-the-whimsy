@@ -4,7 +4,7 @@ A cosy, whimsical Minecraft survival modpack. No elytras. Travel by boat, mount,
 
 ## 🌿 For Players
 
-Visit the [landing page](https://YOUR_GITHUB_USERNAME.github.io/for-the-whimsy) to download the installer.
+Visit the [landing page](https://DregenFley.github.io/for-the-whimsy) to download the installer.
 
 The installer will:
 - Download and install the latest modpack version into CurseForge
@@ -27,7 +27,7 @@ This repo is fully open so you can see exactly what the installer does before ru
    ```json
    {
      "version": "1.x.x",
-     "download_url": "https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/for-the-whimsy/main/modpack/ForTheWhimsy.zip",
+     "download_url": "https://raw.githubusercontent.com/DregenFley/for-the-whimsy/main/modpack/ForTheWhimsy.zip",
      "changelog": "What changed in this version"
    }
    ```
