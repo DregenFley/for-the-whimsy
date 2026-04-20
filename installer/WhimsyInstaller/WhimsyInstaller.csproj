@@ -6,7 +6,6 @@
     <UseWPF>true</UseWPF>
     <AssemblyName>ForTheWhimsy-Installer</AssemblyName>
     <RootNamespace>WhimsyInstaller</RootNamespace>
-    <ApplicationIcon>icon.ico</ApplicationIcon>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <PublishSingleFile>true</PublishSingleFile>

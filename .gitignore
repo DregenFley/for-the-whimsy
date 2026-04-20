@@ -1,0 +1,11 @@
+# Build output
+installer/WhimsyInstaller/bin/
+installer/WhimsyInstaller/obj/
+
+# User-specific VS files
+*.user
+.vs/
+
+# OS files
+.DS_Store
+Thumbs.db

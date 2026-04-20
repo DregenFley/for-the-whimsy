@@ -179,7 +179,7 @@ namespace WhimsyInstaller
                 Directory.Delete(_profilePath, recursive: true);
 
             Directory.CreateDirectory(_profilePath!);
-            ZipFile.ExtractToDirectory(zipPath, _profilePath);
+            ZipFile.ExtractToDirectory(zipPath, _profilePath!);
             File.Delete(zipPath);
         }
 

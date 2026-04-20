@@ -113,13 +113,13 @@
                     </Grid.ColumnDefinitions>
                     <Border Grid.Column="0" Background="#f0ebe0" BorderBrush="#d4c4a8" BorderThickness="0.5" CornerRadius="8" Padding="12,10">
                         <StackPanel>
-                            <TextBlock Text="INSTALLED" FontSize="10" Foreground="#a09070" LetterSpacing="1"/>
+                            <TextBlock Text="INSTALLED" FontSize="10" Foreground="#a09070"/>
                             <TextBlock x:Name="InstalledVersionText" Text="—" FontSize="20" FontWeight="Medium" Foreground="#3a2e1e" Margin="0,3,0,0"/>
                         </StackPanel>
                     </Border>
                     <Border Grid.Column="2" Background="#f0ebe0" BorderBrush="#d4c4a8" BorderThickness="0.5" CornerRadius="8" Padding="12,10">
                         <StackPanel>
-                            <TextBlock Text="LATEST" FontSize="10" Foreground="#a09070" LetterSpacing="1"/>
+                            <TextBlock Text="LATEST" FontSize="10" Foreground="#a09070"/>
                             <TextBlock x:Name="LatestVersionText" Text="..." FontSize="20" FontWeight="Medium" Foreground="#4a7c3f" Margin="0,3,0,0"/>
                         </StackPanel>
                     </Border>
