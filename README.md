@@ -52,3 +52,5 @@ This repo is fully open so you can see exactly what the setup tool does before r
 ## VirusTotal
 
 [View the latest scan →](https://www.virustotal.com/gui/file/fb1a39e1c9476841f4679181095b6550f772c29d3edbf4d9ecc194945952800c/detection)
+
+> ⚠ Update this link after each new setup tool release — the scan is tied to the specific build.
