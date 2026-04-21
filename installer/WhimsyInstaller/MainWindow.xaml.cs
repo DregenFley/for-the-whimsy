@@ -1,11 +1,14 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace WhimsyInstaller
@@ -14,7 +17,7 @@ namespace WhimsyInstaller
     {
         // ─── CONFIG ───────────────────────────────────────────────────────────────
         private const string VersionJsonUrl =
-            "https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/for-the-whimsy/main/version.json";
+            "https://raw.githubusercontent.com/DregenFley/for-the-whimsy/main/version.json";
         private const string ProfileFolderName = "For the Whimsy";
         private const string ConfigFileName = "whimsy_config.json";
         // ─────────────────────────────────────────────────────────────────────────
@@ -27,9 +30,9 @@ namespace WhimsyInstaller
         private string? _changelog;
         private string? _instancesPath;
         private string? _profilePath;
-        private string? _journeyMapBackupPath;
-        private bool _hasJourneyMapData;
+        private string? _selectedSourceProfilePath;
         private AppConfig _config = new();
+        private List<ProfileEntry> _profiles = new();
 
         public MainWindow()
         {
@@ -100,9 +103,9 @@ namespace WhimsyInstaller
             LatestVersionText.Text = _latestVersion;
         }
 
-        // ── BUTTON HANDLER ────────────────────────────────────────────────────────
+        // ── BUTTON HANDLERS ───────────────────────────────────────────────────────
 
-        private async void ActionButton_Click(object sender, RoutedEventArgs e)
+        private void ActionButton_Click(object sender, RoutedEventArgs e)
         {
             if (_installedVersion == _latestVersion)
             {
@@ -110,8 +113,53 @@ namespace WhimsyInstaller
                 return;
             }
 
+            // Show the pre-install profile picker instead of starting immediately.
+            PopulateProfileDropdown();
             ActionButton.IsEnabled = false;
+            ActionButton.Visibility = Visibility.Collapsed;
+            PreInstallPanel.Visibility = Visibility.Visible;
+        }
+
+        private async void ConfirmInstallButton_Click(object sender, RoutedEventArgs e)
+        {
+            var selected = ProfileDropdown.SelectedItem as ProfileEntry;
+            _selectedSourceProfilePath = (selected != null && !selected.IsNone) ? selected.Path : null;
+
+            PreInstallPanel.Visibility = Visibility.Collapsed;
+            ActionButton.Visibility = Visibility.Visible;
+            ActionButton.IsEnabled = false;
+
             await RunInstallAsync();
+        }
+
+        private void CancelPreInstallButton_Click(object sender, RoutedEventArgs e)
+        {
+            PreInstallPanel.Visibility = Visibility.Collapsed;
+            ActionButton.Visibility = Visibility.Visible;
+            ActionButton.IsEnabled = true;
+        }
+
+        private void ProfileDropdown_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selected = ProfileDropdown.SelectedItem as ProfileEntry;
+            if (selected == null)
+            {
+                ProfileHint.Text = "";
+                return;
+            }
+
+            if (selected.IsNone)
+            {
+                ProfileHint.Text = "No map data will be copied. JourneyMap will start blank.";
+            }
+            else if (selected.HasJourneyMap)
+            {
+                ProfileHint.Text = $"Will copy JourneyMap data from \"{System.IO.Path.GetFileName(selected.Path)}\".";
+            }
+            else
+            {
+                ProfileHint.Text = $"\"{System.IO.Path.GetFileName(selected.Path)}\" has no JourneyMap folder — nothing will be copied.";
+            }
         }
 
         // ── INSTALL ───────────────────────────────────────────────────────────────
@@ -121,12 +169,34 @@ namespace WhimsyInstaller
             LogPanel.Visibility = Visibility.Visible;
             ProgressPanel.Visibility = Visibility.Visible;
 
-            // Step 1 — backup JourneyMap if it exists
-            _hasJourneyMapData = CheckJourneyMapData();
-            if (_hasJourneyMapData)
+            // Step 1 — back up JourneyMap from the selected source profile (if any).
+            // We back up first because the destination may be the same folder as the source
+            // (e.g. updating the existing "For the Whimsy" profile in place).
+            string? backupPath = null;
+            string? sourceName = null;
+            if (_selectedSourceProfilePath != null)
             {
-                SetLog("Backing up JourneyMap data...", "", "");
-                BackupJourneyMap();
+                var srcJm = Path.Combine(_selectedSourceProfilePath, "journeymap");
+                if (Directory.Exists(srcJm))
+                {
+                    sourceName = Path.GetFileName(_selectedSourceProfilePath);
+                    SetLog($"Backing up JourneyMap from \"{sourceName}\"...", "", "");
+                    var backupTarget = Path.Combine(Path.GetTempPath(), "whimsy_journeymap_backup");
+                    backupPath = backupTarget;
+                    try
+                    {
+                        if (Directory.Exists(backupTarget)) Directory.Delete(backupTarget, recursive: true);
+                        await Task.Run(() => CopyDirectory(srcJm, backupTarget));
+                    }
+                    catch (Exception ex)
+                    {
+                        SetBanner("#fceaea", "#E24B4A", "Backup failed", ex.Message);
+                        SetLog("Could not back up JourneyMap data.", "", "");
+                        ActionButton.Content = "Try again";
+                        ActionButton.IsEnabled = true;
+                        return;
+                    }
+                }
             }
 
             // Step 2 — download
@@ -152,25 +222,39 @@ namespace WhimsyInstaller
             SetFooter("installing...", "#6aaa4a");
             await Task.Run(() => ExtractModpack(zipPath));
 
-            // Step 4 — save config
+            // Step 4 — restore JourneyMap data into the newly-extracted profile.
+            bool mapKept = false;
+            if (backupPath != null && Directory.Exists(backupPath))
+            {
+                SetLog("Install complete.", $"Restoring JourneyMap from \"{sourceName}\"...", "");
+                try
+                {
+                    var dest = Path.Combine(_profilePath!, "journeymap");
+                    var src = backupPath;
+                    if (Directory.Exists(dest)) Directory.Delete(dest, recursive: true);
+                    await Task.Run(() => CopyDirectory(src, dest));
+                    Directory.Delete(backupPath, recursive: true);
+                    mapKept = true;
+                }
+                catch (Exception ex)
+                {
+                    // Non-fatal: install succeeded, just couldn't restore map data.
+                    MessageBox.Show(
+                        $"The modpack installed successfully, but we couldn't copy your JourneyMap data:\n\n{ex.Message}\n\nYour backup is at:\n{backupPath}",
+                        "For the Whimsy",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                }
+            }
+
+            // Step 5 — save config
             _config.InstalledVersion = _latestVersion;
             _config.ProfilePath = _profilePath;
             SaveConfig(_config);
             InstalledVersionText.Text = _latestVersion;
             _installedVersion = _latestVersion;
 
-            // Step 5 — JourneyMap prompt if needed
-            if (_hasJourneyMapData)
-            {
-                LogPanel.Visibility = Visibility.Collapsed;
-                ProgressPanel.Visibility = Visibility.Collapsed;
-                JourneyMapPanel.Visibility = Visibility.Visible;
-                SetBanner("#f0ebe0", "#EF9F27", "Almost done!", "What would you like to do with your old map data?");
-                SetFooter($"installed · {_latestVersion}", "#6aaa4a");
-                return;
-            }
-
-            FinishInstall(mapKept: false);
+            FinishInstall(mapKept, sourceName);
         }
 
         private void ExtractModpack(string zipPath)
@@ -183,55 +267,81 @@ namespace WhimsyInstaller
             File.Delete(zipPath);
         }
 
-        // ── JOURNEYMAP ────────────────────────────────────────────────────────────
-
-        private bool CheckJourneyMapData()
+        private void FinishInstall(bool mapKept, string? sourceName)
         {
-            if (!Directory.Exists(_profilePath)) return false;
-            var jmPath = Path.Combine(_profilePath, "journeymap");
-            return Directory.Exists(jmPath);
-        }
-
-        private void BackupJourneyMap()
-        {
-            var jmPath = Path.Combine(_profilePath!, "journeymap");
-            _journeyMapBackupPath = Path.Combine(Path.GetTempPath(), "whimsy_journeymap_backup");
-            if (Directory.Exists(_journeyMapBackupPath))
-                Directory.Delete(_journeyMapBackupPath, recursive: true);
-            CopyDirectory(jmPath, _journeyMapBackupPath);
-        }
-
-        private void KeepMapButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (_journeyMapBackupPath != null && Directory.Exists(_journeyMapBackupPath))
-            {
-                var dest = Path.Combine(_profilePath!, "journeymap");
-                if (Directory.Exists(dest)) Directory.Delete(dest, recursive: true);
-                CopyDirectory(_journeyMapBackupPath, dest);
-                Directory.Delete(_journeyMapBackupPath, recursive: true);
-            }
-            FinishInstall(mapKept: true);
-        }
-
-        private void FreshMapButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (_journeyMapBackupPath != null && Directory.Exists(_journeyMapBackupPath))
-                Directory.Delete(_journeyMapBackupPath, recursive: true);
-            FinishInstall(mapKept: false);
-        }
-
-        private void FinishInstall(bool mapKept)
-        {
-            JourneyMapPanel.Visibility = Visibility.Collapsed;
             ProgressPanel.Visibility = Visibility.Collapsed;
             LogPanel.Visibility = Visibility.Collapsed;
+            PreInstallPanel.Visibility = Visibility.Collapsed;
 
-            var mapNote = mapKept ? " · map data kept" : "";
+            var mapNote = mapKept
+                ? (sourceName != null ? $" · map data copied from \"{sourceName}\"" : " · map data kept")
+                : "";
             SetBanner("#e8f0de", "#6aaa4a", "You're all set!", $"{_latestVersion} installed{mapNote}. Time to play!");
             SetFooter($"ready · {_latestVersion} installed", "#6aaa4a");
 
+            ActionButton.Visibility = Visibility.Visible;
             ActionButton.Content = "Launch CurseForge";
             ActionButton.IsEnabled = true;
+        }
+
+        // ── PROFILE SCANNING ──────────────────────────────────────────────────────
+
+        private void PopulateProfileDropdown()
+        {
+            _profiles = new List<ProfileEntry>();
+
+            // Always offer a "skip" option first.
+            var skipEntry = new ProfileEntry
+            {
+                IsNone = true,
+                DisplayName = "— Start with a fresh map —",
+                Path = null,
+                HasJourneyMap = false,
+            };
+            _profiles.Add(skipEntry);
+
+            if (!string.IsNullOrEmpty(_instancesPath) && Directory.Exists(_instancesPath))
+            {
+                // Enumerate top-level CurseForge profile directories.
+                IEnumerable<string> dirs;
+                try
+                {
+                    dirs = Directory.GetDirectories(_instancesPath);
+                }
+                catch
+                {
+                    dirs = Array.Empty<string>();
+                }
+
+                foreach (var dir in dirs.OrderBy(d => Path.GetFileName(d), StringComparer.OrdinalIgnoreCase))
+                {
+                    var name = Path.GetFileName(dir);
+                    var hasJm = Directory.Exists(Path.Combine(dir, "journeymap"));
+                    var label = hasJm ? $"{name}   ✓ has map data" : $"{name}   (no map data)";
+                    _profiles.Add(new ProfileEntry
+                    {
+                        DisplayName = label,
+                        Path = dir,
+                        HasJourneyMap = hasJm,
+                        IsNone = false,
+                    });
+                }
+            }
+
+            ProfileDropdown.ItemsSource = _profiles;
+
+            // Pick a sensible default:
+            //  1. "For the Whimsy" profile if it has JM data (most common — upgrading in place)
+            //  2. Any profile with JM data
+            //  3. The "skip" entry
+            var preferred = _profiles.FirstOrDefault(p =>
+                                !p.IsNone &&
+                                p.HasJourneyMap &&
+                                string.Equals(Path.GetFileName(p.Path), ProfileFolderName, StringComparison.OrdinalIgnoreCase))
+                         ?? _profiles.FirstOrDefault(p => !p.IsNone && p.HasJourneyMap)
+                         ?? skipEntry;
+
+            ProfileDropdown.SelectedItem = preferred;
         }
 
         // ── LAUNCH ────────────────────────────────────────────────────────────────
@@ -355,5 +465,13 @@ namespace WhimsyInstaller
     {
         public string? InstalledVersion { get; set; }
         public string? ProfilePath { get; set; }
+    }
+
+    public class ProfileEntry
+    {
+        public string DisplayName { get; set; } = "";
+        public string? Path { get; set; }
+        public bool HasJourneyMap { get; set; }
+        public bool IsNone { get; set; }
     }
 }

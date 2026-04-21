@@ -8,7 +8,7 @@ Visit the [landing page](https://DregenFley.github.io/for-the-whimsy) to downloa
 
 The installer will:
 - Download and install the latest modpack version into CurseForge
-- Keep your JourneyMap data across updates (with your permission)
+- Let you pick any existing CurseForge profile as the source of your JourneyMap data (handy if you've renamed profiles or are migrating from another modpack), or skip to start with a fresh map
 - Auto-update next time you run it
 
 ## 🔧 For the Curious

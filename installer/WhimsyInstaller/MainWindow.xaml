@@ -6,7 +6,8 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         Background="#faf6ee"
-        FontFamily="Segoe UI">
+        FontFamily="Segoe UI"
+        Icon="app.ico">
 
     <Window.Resources>
         <Style x:Key="PrimaryButton" TargetType="Button">
@@ -86,12 +87,30 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Canvas Width="36" Height="36" VerticalAlignment="Center">
+                    <!-- dark circular background for contrast against the header bar -->
                     <Ellipse Canvas.Left="0" Canvas.Top="0" Width="36" Height="36" Fill="#4a3520"/>
-                    <Path Data="M18 4 C12 4 9 9 9 14 C9 17 10.2 19 12 20.5 L12 28 L24 28 L24 20.5 C25.8 19 27 17 27 14 C27 9 24 4 18 4Z" Fill="#5a8a3a"/>
-                    <Path Data="M15 28 L21 28 L21 30.5 C21 31 20.6 31.5 20 31.5 L16 31.5 C15.4 31.5 15 31 15 30.5Z" Fill="#3a5e28"/>
-                    <Ellipse Canvas.Left="28" Canvas.Top="8" Width="4" Height="4" Fill="#f5c842" Opacity="0.8"/>
-                    <Ellipse Canvas.Left="8" Canvas.Top="18" Width="3" Height="3" Fill="#f5c842" Opacity="0.6"/>
-                    <Ellipse Canvas.Left="29" Canvas.Top="19" Width="2.5" Height="2.5" Fill="#f5c842" Opacity="0.5"/>
+
+                    <!-- purple flower: 5 petals around a yellow centre -->
+                    <!-- darker petal under-layer gives a soft outline/depth -->
+                    <Ellipse Canvas.Left="12.5" Canvas.Top="5.5" Width="11" Height="11" Fill="#7a4ea8"/>
+                    <Ellipse Canvas.Left="19.5" Canvas.Top="10.5" Width="11" Height="11" Fill="#7a4ea8"/>
+                    <Ellipse Canvas.Left="16.5" Canvas.Top="18.5" Width="11" Height="11" Fill="#7a4ea8"/>
+                    <Ellipse Canvas.Left="8.5"  Canvas.Top="18.5" Width="11" Height="11" Fill="#7a4ea8"/>
+                    <Ellipse Canvas.Left="5.5"  Canvas.Top="10.5" Width="11" Height="11" Fill="#7a4ea8"/>
+
+                    <!-- lighter petal tops -->
+                    <Ellipse Canvas.Left="13" Canvas.Top="6"  Width="10" Height="10" Fill="#a57cc9"/>
+                    <Ellipse Canvas.Left="20" Canvas.Top="11" Width="10" Height="10" Fill="#a57cc9"/>
+                    <Ellipse Canvas.Left="17" Canvas.Top="19" Width="10" Height="10" Fill="#a57cc9"/>
+                    <Ellipse Canvas.Left="9"  Canvas.Top="19" Width="10" Height="10" Fill="#a57cc9"/>
+                    <Ellipse Canvas.Left="6"  Canvas.Top="11" Width="10" Height="10" Fill="#a57cc9"/>
+
+                    <!-- yellow centre -->
+                    <Ellipse Canvas.Left="14" Canvas.Top="14" Width="8" Height="8" Fill="#f5c842"/>
+
+                    <!-- whimsy sparkles -->
+                    <Ellipse Canvas.Left="30" Canvas.Top="5"  Width="3"   Height="3"   Fill="#f5c842" Opacity="0.7"/>
+                    <Ellipse Canvas.Left="3"  Canvas.Top="29" Width="2.5" Height="2.5" Fill="#f5c842" Opacity="0.5"/>
                 </Canvas>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="12,0,0,0">
                     <TextBlock Text="For the Whimsy" FontSize="15" FontWeight="Medium" Foreground="#e8dcc8"/>
@@ -156,19 +175,29 @@
                     </StackPanel>
                 </Border>
 
-                <!-- JourneyMap Prompt -->
-                <Border x:Name="JourneyMapPanel" Background="#f0ebe0" BorderBrush="#c9b99a" BorderThickness="0.5" CornerRadius="10" Padding="14,12" Margin="0,0,0,12" Visibility="Collapsed">
+                <!-- Pre-Install Profile Picker -->
+                <Border x:Name="PreInstallPanel" Background="#f0ebe0" BorderBrush="#c9b99a" BorderThickness="0.5" CornerRadius="10" Padding="14,12" Margin="0,0,0,12" Visibility="Collapsed">
                     <StackPanel>
-                        <TextBlock Text="Keep your old map data?" FontSize="13" FontWeight="Medium" Foreground="#3a2e1e" Margin="0,0,0,5"/>
-                        <TextBlock Text="JourneyMap data from your previous install was found. Keep it if the server world hasn't changed — or start fresh if it has." FontSize="11" Foreground="#7a6a52" TextWrapping="Wrap" LineHeight="17" Margin="0,0,0,12"/>
+                        <TextBlock Text="Import map data?" FontSize="13" FontWeight="Medium" Foreground="#3a2e1e" Margin="0,0,0,5"/>
+                        <TextBlock Text="Pick an existing profile to copy your JourneyMap data from. Profiles with an existing map are marked ✓. Choose &quot;Start with a fresh map&quot; to skip." FontSize="11" Foreground="#7a6a52" TextWrapping="Wrap" LineHeight="17" Margin="0,0,0,10"/>
+
+                        <TextBlock Text="SOURCE PROFILE" FontSize="10" Foreground="#a09070" Margin="0,0,0,4"/>
+                        <ComboBox x:Name="ProfileDropdown"
+                                  FontSize="12"
+                                  Padding="8,6"
+                                  Margin="0,0,0,6"
+                                  DisplayMemberPath="DisplayName"
+                                  SelectionChanged="ProfileDropdown_SelectionChanged"/>
+                        <TextBlock x:Name="ProfileHint" Text="" FontSize="10" Foreground="#7a6a52" FontStyle="Italic" Margin="0,0,0,10" TextWrapping="Wrap"/>
+
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="8"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" x:Name="KeepMapButton" Content="Keep my map" Style="{StaticResource PrimaryButton}" Click="KeepMapButton_Click"/>
-                            <Button Grid.Column="2" x:Name="FreshMapButton" Content="Start fresh" Style="{StaticResource SecondaryButton}" Click="FreshMapButton_Click"/>
+                            <Button Grid.Column="0" x:Name="ConfirmInstallButton" Content="Start install" Style="{StaticResource PrimaryButton}" Click="ConfirmInstallButton_Click"/>
+                            <Button Grid.Column="2" x:Name="CancelPreInstallButton" Content="Cancel" Style="{StaticResource SecondaryButton}" Click="CancelPreInstallButton_Click"/>
                         </Grid>
                     </StackPanel>
                 </Border>
