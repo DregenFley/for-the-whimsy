@@ -78,6 +78,7 @@ namespace WhimsyInstaller
                 SetBanner("#e8f0de", "#6aaa4a", "You're up to date!", $"Version {_latestVersion} is installed.");
                 ActionButton.Content = "Launch CurseForge";
                 ActionButton.IsEnabled = true;
+                ReinstallButton.Visibility = Visibility.Visible;
             }
             else
             {
@@ -137,6 +138,17 @@ namespace WhimsyInstaller
             PreInstallPanel.Visibility = Visibility.Collapsed;
             ActionButton.Visibility = Visibility.Visible;
             ActionButton.IsEnabled = true;
+            if (_installedVersion == _latestVersion)
+                ReinstallButton.Visibility = Visibility.Visible;
+        }
+
+        private void ReinstallButton_Click(object sender, RoutedEventArgs e)
+        {
+            PopulateProfileDropdown();
+            ActionButton.IsEnabled = false;
+            ActionButton.Visibility = Visibility.Collapsed;
+            ReinstallButton.Visibility = Visibility.Collapsed;
+            PreInstallPanel.Visibility = Visibility.Visible;
         }
 
         private void ProfileDropdown_SelectionChanged(object sender, SelectionChangedEventArgs e)

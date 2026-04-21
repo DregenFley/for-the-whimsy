@@ -217,6 +217,9 @@
                 <!-- Main Action Button -->
                 <Button x:Name="ActionButton" Content="Checking..." Style="{StaticResource PrimaryButton}" IsEnabled="False" Click="ActionButton_Click" Margin="0,0,0,0"/>
 
+                <!-- Reinstall Button (visible only when up to date) -->
+                <Button x:Name="ReinstallButton" Content="Re-install modpack" Style="{StaticResource SecondaryButton}" Visibility="Collapsed" Click="ReinstallButton_Click" Margin="0,8,0,0"/>
+
             </StackPanel>
         </ScrollViewer>
 
