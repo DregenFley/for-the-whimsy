@@ -152,6 +152,27 @@
 
     .btn-download svg { flex-shrink: 0; }
 
+    .btn-modpack {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      color: #6a8a50;
+      text-decoration: none;
+      font-family: 'Lora', serif;
+      font-size: 0.9rem;
+      padding: 0.6rem 1.4rem;
+      border-radius: 10px;
+      border: 1px solid #3a5a2a;
+      transition: background 0.2s, color 0.2s;
+      margin-bottom: 1rem;
+    }
+
+    .btn-modpack:hover {
+      background: rgba(74,124,63,0.1);
+      color: #a8d070;
+    }
+
     .trust-links {
       display: flex;
       gap: 1.5rem;
@@ -371,12 +392,20 @@
     actually matters.
   </p>
 
-  <a class="btn-download" href="https://github.com/DregenFley/for-the-whimsy/releases/latest/download/ForTheWhimsy-Installer.exe">
+  <a class="btn-download" id="modpackBtn" href="https://github.com/DregenFley/for-the-whimsy/releases/latest" target="_blank">
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
       <path d="M9 2v9M5.5 7.5L9 11l3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <path d="M3 13.5h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
     </svg>
-    Download installer
+    <span id="modpackBtnText">Download modpack</span>
+  </a>
+
+  <a class="btn-modpack" href="https://github.com/DregenFley/for-the-whimsy/releases/latest/download/ForTheWhimsy-Installer.exe">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.3"/>
+      <path d="M8 5v4M6 7.5L8 9.5l2-2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Download setup tool
   </a>
 
   <div class="trust-links">
@@ -488,19 +517,23 @@
 <!-- ── INSTALL ── -->
 <section>
   <p class="section-label">Getting started</p>
-  <h2>Installing in <em>three steps</em></h2>
+  <h2>Installing in <em>four steps</em></h2>
   <div class="steps">
     <div class="step">
       <div class="step-num">1</div>
-      <p><strong><a href="https://www.curseforge.com/download/app" target="_blank">Download CurseForge</a></strong> if you don't have it already - it manages your modpack profile and launches the game.</p>
+      <p><strong><a href="https://www.curseforge.com/download/app" target="_blank">Download CurseForge</a></strong> if you don't have it already — it manages your modpack profile and launches the game.</p>
     </div>
     <div class="step">
       <div class="step-num">2</div>
-      <p><strong>Download the installer</strong> using the button above and run it. Windows may show a security warning - click "More info" then "Run anyway". The installer is open source so you can verify it yourself.</p>
+      <p><strong>Download the modpack</strong> using the button above. In CurseForge, go to <strong>Minecraft → Create Custom Profile → Import</strong> and select the downloaded zip. CurseForge will install all the mods automatically.</p>
     </div>
     <div class="step">
       <div class="step-num">3</div>
-      <p><strong>Click Install</strong> - the installer handles everything. It'll download the modpack, set up your CurseForge profile, and open CurseForge when it's done.</p>
+      <p><strong>Download the setup tool</strong> and run it. Windows may show a security warning — click "More info" then "Run anyway". The tool is open source so you can verify it yourself.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <p><strong>Copy your data across</strong> — pick your old profile as the source and For the Whimsy as the destination. The tool will carry over your map, keybinds, and settings.</p>
     </div>
   </div>
 </section>
@@ -516,6 +549,22 @@
 </footer>
 
 <script>
+  // Fetch modpack version and update download button
+  fetch('https://raw.githubusercontent.com/DregenFley/for-the-whimsy/main/version.json')
+    .then(r => r.json())
+    .then(data => {
+      const version = data.version;
+      const tag = `modpack-v${version}`;
+      const url = `https://github.com/DregenFley/for-the-whimsy/releases/download/${tag}/For.The.Whimsy.zip`;
+      const btn = document.getElementById('modpackBtn');
+      const text = document.getElementById('modpackBtnText');
+      if (btn && text) {
+        btn.href = url;
+        text.textContent = `Download modpack · v${version}`;
+      }
+    })
+    .catch(() => {}); // silently fail — button still links to releases page
+
   const sparkleData = [
     { left: '12%', top: '18%', d: '3.2s', delay: '0s' },
     { left: '88%', top: '12%', d: '4s', delay: '0.8s' },

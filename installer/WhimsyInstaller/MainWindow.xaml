@@ -1,8 +1,8 @@
 <Window x:Class="WhimsyInstaller.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="For the Whimsy — Installer"
-        Height="520" Width="440"
+        Title="For the Whimsy — Setup"
+        Height="560" Width="440"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         Background="#faf6ee"
@@ -70,6 +70,39 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="WhimsyCheckBox" TargetType="CheckBox">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#3a2e1e"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
+                            <Border x:Name="Box" Width="16" Height="16" CornerRadius="4"
+                                    Background="#faf6ee" BorderBrush="#c9b99a" BorderThickness="1"
+                                    Margin="0,1,8,0" VerticalAlignment="Top">
+                                <TextBlock x:Name="Tick" Text="✓" FontSize="11" Foreground="#4a7c3f"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           Visibility="Collapsed"/>
+                            </Border>
+                            <ContentPresenter VerticalAlignment="Top"/>
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Box" Property="Background" Value="#e8f0de"/>
+                                <Setter TargetName="Box" Property="BorderBrush" Value="#4a7c3f"/>
+                                <Setter TargetName="Tick" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Box" Property="BorderBrush" Value="#4a7c3f"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -87,138 +120,103 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Canvas Width="36" Height="36" VerticalAlignment="Center">
-                    <!-- dark circular background for contrast against the header bar -->
                     <Ellipse Canvas.Left="0" Canvas.Top="0" Width="36" Height="36" Fill="#4a3520"/>
-
-                    <!-- purple flower: 5 petals around a yellow centre -->
-                    <!-- darker petal under-layer gives a soft outline/depth -->
                     <Ellipse Canvas.Left="12.5" Canvas.Top="5.5" Width="11" Height="11" Fill="#7a4ea8"/>
                     <Ellipse Canvas.Left="19.5" Canvas.Top="10.5" Width="11" Height="11" Fill="#7a4ea8"/>
                     <Ellipse Canvas.Left="16.5" Canvas.Top="18.5" Width="11" Height="11" Fill="#7a4ea8"/>
                     <Ellipse Canvas.Left="8.5"  Canvas.Top="18.5" Width="11" Height="11" Fill="#7a4ea8"/>
                     <Ellipse Canvas.Left="5.5"  Canvas.Top="10.5" Width="11" Height="11" Fill="#7a4ea8"/>
-
-                    <!-- lighter petal tops -->
                     <Ellipse Canvas.Left="13" Canvas.Top="6"  Width="10" Height="10" Fill="#a57cc9"/>
                     <Ellipse Canvas.Left="20" Canvas.Top="11" Width="10" Height="10" Fill="#a57cc9"/>
                     <Ellipse Canvas.Left="17" Canvas.Top="19" Width="10" Height="10" Fill="#a57cc9"/>
                     <Ellipse Canvas.Left="9"  Canvas.Top="19" Width="10" Height="10" Fill="#a57cc9"/>
                     <Ellipse Canvas.Left="6"  Canvas.Top="11" Width="10" Height="10" Fill="#a57cc9"/>
-
-                    <!-- yellow centre -->
                     <Ellipse Canvas.Left="14" Canvas.Top="14" Width="8" Height="8" Fill="#f5c842"/>
-
-                    <!-- whimsy sparkles -->
                     <Ellipse Canvas.Left="30" Canvas.Top="5"  Width="3"   Height="3"   Fill="#f5c842" Opacity="0.7"/>
                     <Ellipse Canvas.Left="3"  Canvas.Top="29" Width="2.5" Height="2.5" Fill="#f5c842" Opacity="0.5"/>
                 </Canvas>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="12,0,0,0">
                     <TextBlock Text="For the Whimsy" FontSize="15" FontWeight="Medium" Foreground="#e8dcc8"/>
-                    <TextBlock Text="modpack installer" FontSize="10" Foreground="#8a7055"/>
+                    <TextBlock Text="profile setup tool" FontSize="10" Foreground="#8a7055"/>
                 </StackPanel>
             </Grid>
         </Border>
 
         <!-- Main Content -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="16,14,16,14" x:Name="MainPanel">
+            <StackPanel Margin="16,14,16,14">
 
-                <!-- Version Info Cards -->
-                <Grid Margin="0,0,0,12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="8"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Border Grid.Column="0" Background="#f0ebe0" BorderBrush="#d4c4a8" BorderThickness="0.5" CornerRadius="8" Padding="12,10">
-                        <StackPanel>
-                            <TextBlock Text="INSTALLED" FontSize="10" Foreground="#a09070"/>
-                            <TextBlock x:Name="InstalledVersionText" Text="—" FontSize="20" FontWeight="Medium" Foreground="#3a2e1e" Margin="0,3,0,0"/>
-                        </StackPanel>
-                    </Border>
-                    <Border Grid.Column="2" Background="#f0ebe0" BorderBrush="#d4c4a8" BorderThickness="0.5" CornerRadius="8" Padding="12,10">
-                        <StackPanel>
-                            <TextBlock Text="LATEST" FontSize="10" Foreground="#a09070"/>
-                            <TextBlock x:Name="LatestVersionText" Text="..." FontSize="20" FontWeight="Medium" Foreground="#4a7c3f" Margin="0,3,0,0"/>
-                        </StackPanel>
-                    </Border>
-                </Grid>
-
-                <!-- Status / Changelog Banner -->
-                <Border x:Name="StatusBanner" Background="#f0ebe0" BorderBrush="#d4c4a8" BorderThickness="0.5" CornerRadius="8" Padding="12,10" Margin="0,0,0,12">
+                <!-- Status Banner -->
+                <Border x:Name="StatusBanner" Background="#f0ebe0" BorderBrush="#d4c4a8" BorderThickness="0.5" CornerRadius="8" Padding="12,10" Margin="0,0,0,12" Visibility="Collapsed">
                     <StackPanel Orientation="Horizontal">
-                        <Ellipse Width="8" Height="8" Fill="#EF9F27" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <Ellipse x:Name="BannerDot" Width="8" Height="8" Fill="#6aaa4a" VerticalAlignment="Center" Margin="0,0,8,0"/>
                         <StackPanel>
-                            <TextBlock x:Name="BannerTitle" Text="Checking for updates..." FontSize="12" FontWeight="Medium" Foreground="#3a2e1e"/>
-                            <TextBlock x:Name="BannerSubtitle" Text="" FontSize="11" Foreground="#7a6a52" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                            <TextBlock x:Name="BannerTitle" FontSize="12" FontWeight="Medium" Foreground="#3a2e1e"/>
+                            <TextBlock x:Name="BannerSubtitle" FontSize="11" Foreground="#7a6a52" Margin="0,2,0,0" TextWrapping="Wrap"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
 
-                <!-- Progress -->
-                <StackPanel x:Name="ProgressPanel" Visibility="Collapsed" Margin="0,0,0,12">
-                    <Grid Margin="0,0,0,5">
-                        <TextBlock x:Name="ProgressLabel" Text="Downloading..." FontSize="11" Foreground="#7a6a52"/>
-                        <TextBlock x:Name="ProgressPercent" Text="0%" FontSize="11" Foreground="#4a7c3f" HorizontalAlignment="Right"/>
-                    </Grid>
-                    <Border Background="#e8dfc8" CornerRadius="99" Height="5">
-                        <Border x:Name="ProgressBar" Background="#6aaa4a" CornerRadius="99" HorizontalAlignment="Left" Width="0"/>
-                    </Border>
-                </StackPanel>
-
-                <!-- Log Output -->
-                <Border x:Name="LogPanel" Background="#f5f0e6" BorderBrush="#ddd0b8" BorderThickness="0.5" CornerRadius="8" Padding="12,10" Margin="0,0,0,12" Visibility="Collapsed">
-                    <StackPanel x:Name="LogStack">
-                        <TextBlock x:Name="LogLine1" FontSize="11" Foreground="#7a6a52" FontFamily="Consolas"/>
-                        <TextBlock x:Name="LogLine2" FontSize="11" Foreground="#7a6a52" FontFamily="Consolas"/>
-                        <TextBlock x:Name="LogLine3" FontSize="11" Foreground="#4a7c3f" FontFamily="Consolas"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- Pre-Install Profile Picker -->
-                <Border x:Name="PreInstallPanel" Background="#f0ebe0" BorderBrush="#c9b99a" BorderThickness="0.5" CornerRadius="10" Padding="14,12" Margin="0,0,0,12" Visibility="Collapsed">
+                <!-- FROM -->
+                <Border Background="#f0ebe0" BorderBrush="#c9b99a" BorderThickness="0.5" CornerRadius="10" Padding="14,12" Margin="0,0,0,10">
                     <StackPanel>
-                        <TextBlock Text="Import map data?" FontSize="13" FontWeight="Medium" Foreground="#3a2e1e" Margin="0,0,0,5"/>
-                        <TextBlock Text="Pick an existing profile to copy your JourneyMap data from. Profiles with an existing map are marked ✓. Choose &quot;Start with a fresh map&quot; to skip." FontSize="11" Foreground="#7a6a52" TextWrapping="Wrap" LineHeight="17" Margin="0,0,0,10"/>
-
-                        <TextBlock Text="SOURCE PROFILE" FontSize="10" Foreground="#a09070" Margin="0,0,0,4"/>
-                        <Grid Margin="0,0,0,6">
+                        <TextBlock Text="COPY FROM" FontSize="10" Foreground="#a09070" Margin="0,0,0,6"/>
+                        <Grid Margin="0,0,0,4">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <ComboBox x:Name="ProfileDropdown"
-                                      Grid.Column="0"
-                                      FontSize="12"
-                                      Padding="8,6"
+                            <ComboBox x:Name="SourceDropdown" Grid.Column="0"
+                                      FontSize="12" Padding="8,6"
                                       DisplayMemberPath="DisplayName"
-                                      SelectionChanged="ProfileDropdown_SelectionChanged"/>
-                            <Button Grid.Column="1" x:Name="BrowseFolderButton" Content="Browse…"
-                                    Margin="6,0,0,0"
+                                      SelectionChanged="SourceDropdown_SelectionChanged"/>
+                            <Button Grid.Column="1" Content="Browse…" Margin="6,0,0,0"
                                     Style="{StaticResource SecondaryButton}"
-                                    Padding="10,0"
-                                    Click="BrowseFolderButton_Click"/>
+                                    Padding="10,0" Click="BrowseFolderButton_Click"/>
                         </Grid>
-                        <TextBlock x:Name="InstancesPathHint" FontSize="9" Foreground="#a09070" FontStyle="Italic" Margin="0,0,0,4" TextWrapping="Wrap"/>
-                        <TextBlock x:Name="ProfileHint" Text="" FontSize="10" Foreground="#7a6a52" FontStyle="Italic" Margin="0,0,0,10" TextWrapping="Wrap"/>
-
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="8"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" x:Name="ConfirmInstallButton" Content="Start install" Style="{StaticResource PrimaryButton}" Click="ConfirmInstallButton_Click"/>
-                            <Button Grid.Column="2" x:Name="CancelPreInstallButton" Content="Cancel" Style="{StaticResource SecondaryButton}" Click="CancelPreInstallButton_Click"/>
-                        </Grid>
+                        <TextBlock x:Name="InstancesPathHint" FontSize="9" Foreground="#a09070" FontStyle="Italic" TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
 
-                <!-- Main Action Button -->
-                <Button x:Name="ActionButton" Content="Checking..." Style="{StaticResource PrimaryButton}" IsEnabled="False" Click="ActionButton_Click" Margin="0,0,0,0"/>
+                <!-- WHAT TO COPY -->
+                <Border Background="#f0ebe0" BorderBrush="#c9b99a" BorderThickness="0.5" CornerRadius="10" Padding="14,12" Margin="0,0,0,10">
+                    <StackPanel>
+                        <TextBlock Text="WHAT TO COPY" FontSize="10" Foreground="#a09070" Margin="0,0,0,10"/>
 
-                <!-- Reinstall Button (visible only when up to date) -->
-                <Button x:Name="ReinstallButton" Content="Re-install modpack" Style="{StaticResource SecondaryButton}" Visibility="Collapsed" Click="ReinstallButton_Click" Margin="0,8,0,0"/>
+                        <CheckBox x:Name="JourneyMapCheck" IsChecked="True" Style="{StaticResource WhimsyCheckBox}">
+                            <StackPanel>
+                                <TextBlock Text="JourneyMap data" FontSize="12" Foreground="#3a2e1e"/>
+                                <TextBlock Text="Your explored map and waypoints" FontSize="10" Foreground="#a09070"/>
+                            </StackPanel>
+                        </CheckBox>
+
+                        <CheckBox x:Name="OptionsCheck" IsChecked="True" Style="{StaticResource WhimsyCheckBox}">
+                            <StackPanel>
+                                <TextBlock Text="Settings &amp; keybinds" FontSize="12" Foreground="#3a2e1e"/>
+                                <TextBlock Text="Video settings, controls, and key bindings" FontSize="10" Foreground="#a09070"/>
+                            </StackPanel>
+                        </CheckBox>
+
+                        <CheckBox x:Name="ServersCheck" IsChecked="True" Style="{StaticResource WhimsyCheckBox}" Margin="0">
+                            <StackPanel>
+                                <TextBlock Text="Server list" FontSize="12" Foreground="#3a2e1e"/>
+                                <TextBlock Text="Your saved server connections" FontSize="10" Foreground="#a09070"/>
+                            </StackPanel>
+                        </CheckBox>
+                    </StackPanel>
+                </Border>
+
+                <!-- INTO -->
+                <Border Background="#f0ebe0" BorderBrush="#c9b99a" BorderThickness="0.5" CornerRadius="10" Padding="14,12" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Text="INTO PROFILE" FontSize="10" Foreground="#a09070" Margin="0,0,0,6"/>
+                        <ComboBox x:Name="DestDropdown" FontSize="12" Padding="8,6"
+                                  DisplayMemberPath="DisplayName"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Copy Button -->
+                <Button x:Name="CopyButton" Content="Copy across" Style="{StaticResource PrimaryButton}" Click="CopyButton_Click"/>
 
             </StackPanel>
         </ScrollViewer>
@@ -227,7 +225,7 @@
         <Border Grid.Row="2" Background="#f5efe3" BorderBrush="#e0d4be" BorderThickness="0,0.5,0,0">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="14,0">
                 <Ellipse Width="6" Height="6" x:Name="StatusDot" Fill="#6aaa4a" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                <TextBlock x:Name="FooterText" Text="connecting..." FontSize="10" Foreground="#a09070" FontFamily="Consolas" VerticalAlignment="Center"/>
+                <TextBlock x:Name="FooterText" Text="ready" FontSize="10" Foreground="#a09070" FontFamily="Consolas" VerticalAlignment="Center"/>
             </StackPanel>
         </Border>
     </Grid>
