@@ -4,7 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
-    <AssemblyName>ForTheWhimsy-Installer</AssemblyName>
+    <AssemblyName>ForTheWhimsy-SetupTool</AssemblyName>
     <RootNamespace>WhimsyInstaller</RootNamespace>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
