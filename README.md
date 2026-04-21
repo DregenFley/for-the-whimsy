@@ -17,21 +17,22 @@ This repo is fully open so you can see exactly what the installer does before ru
 
 - `installer/` — C# WPF installer source code
 - `version.json` — current version info fetched by the installer
-- `modpack/` — the modpack zip downloaded by the installer
 - `index.html` — the landing page (served via GitHub Pages)
+- Modpack zips are hosted as assets on [GitHub Releases](https://github.com/DregenFley/for-the-whimsy/releases)
 
 ## 📦 Releasing a New Version
 
-1. Export your modpack from CurseForge and place the zip in `modpack/ForTheWhimsy.zip`
-2. Update `version.json`:
+1. Export your modpack from CurseForge as a zip
+2. Create a new GitHub Release tagged `modpack-v1.x.x` and upload the zip as a release asset
+3. Update `version.json`:
    ```json
    {
      "version": "1.x.x",
-     "download_url": "https://raw.githubusercontent.com/DregenFley/for-the-whimsy/main/modpack/ForTheWhimsy.zip",
+     "download_url": "https://github.com/DregenFley/for-the-whimsy/releases/download/modpack-v1.x.x/For.The.Whimsy.zip",
      "changelog": "What changed in this version"
    }
    ```
-3. Commit and push — players get the update next time they run the installer
+4. Commit and push `version.json` — players get the update next time they run the installer
 
 ## VirusTotal
 

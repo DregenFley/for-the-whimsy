@@ -47,7 +47,7 @@ namespace WhimsyInstaller
             SetFooter("connecting...", "#6aaa4a");
 
             _config = LoadConfig();
-            _instancesPath = GetInstancesPath();
+            _instancesPath = GetInstancesPath(_config);
             _profilePath = Path.Combine(_instancesPath, ProfileFolderName);
 
             _installedVersion = _config.InstalledVersion;
@@ -330,6 +330,11 @@ namespace WhimsyInstaller
 
             ProfileDropdown.ItemsSource = _profiles;
 
+            // Show the folder being scanned so users know where to browse if it's wrong.
+            InstancesPathHint.Text = Directory.Exists(_instancesPath)
+                ? $"Scanning: {_instancesPath}"
+                : $"Folder not found: {_instancesPath} — click Browse… to locate it.";
+
             // Pick a sensible default:
             //  1. "For the Whimsy" profile if it has JM data (most common — upgrading in place)
             //  2. Any profile with JM data
@@ -421,10 +426,31 @@ namespace WhimsyInstaller
 
         // ── HELPERS ───────────────────────────────────────────────────────────────
 
-        private static string GetInstancesPath()
+        private static string GetInstancesPath(AppConfig config)
         {
+            if (!string.IsNullOrEmpty(config.InstancesPath))
+                return config.InstancesPath;
+
             var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             return Path.Combine(appData, "curseforge", "minecraft", "Instances");
+        }
+
+        private void BrowseFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new Microsoft.Win32.OpenFolderDialog
+            {
+                Title = "Select your CurseForge Instances folder",
+                InitialDirectory = Directory.Exists(_instancesPath) ? _instancesPath : null,
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                _instancesPath = dialog.FolderName;
+                _profilePath = Path.Combine(_instancesPath, ProfileFolderName);
+                _config.InstancesPath = _instancesPath;
+                SaveConfig(_config);
+                PopulateProfileDropdown();
+            }
         }
 
         private static void CopyDirectory(string source, string dest)
@@ -465,6 +491,7 @@ namespace WhimsyInstaller
     {
         public string? InstalledVersion { get; set; }
         public string? ProfilePath { get; set; }
+        public string? InstancesPath { get; set; }
     }
 
     public class ProfileEntry

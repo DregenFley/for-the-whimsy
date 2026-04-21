@@ -182,12 +182,24 @@
                         <TextBlock Text="Pick an existing profile to copy your JourneyMap data from. Profiles with an existing map are marked ✓. Choose &quot;Start with a fresh map&quot; to skip." FontSize="11" Foreground="#7a6a52" TextWrapping="Wrap" LineHeight="17" Margin="0,0,0,10"/>
 
                         <TextBlock Text="SOURCE PROFILE" FontSize="10" Foreground="#a09070" Margin="0,0,0,4"/>
-                        <ComboBox x:Name="ProfileDropdown"
-                                  FontSize="12"
-                                  Padding="8,6"
-                                  Margin="0,0,0,6"
-                                  DisplayMemberPath="DisplayName"
-                                  SelectionChanged="ProfileDropdown_SelectionChanged"/>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ComboBox x:Name="ProfileDropdown"
+                                      Grid.Column="0"
+                                      FontSize="12"
+                                      Padding="8,6"
+                                      DisplayMemberPath="DisplayName"
+                                      SelectionChanged="ProfileDropdown_SelectionChanged"/>
+                            <Button Grid.Column="1" x:Name="BrowseFolderButton" Content="Browse…"
+                                    Margin="6,0,0,0"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Padding="10,0"
+                                    Click="BrowseFolderButton_Click"/>
+                        </Grid>
+                        <TextBlock x:Name="InstancesPathHint" FontSize="9" Foreground="#a09070" FontStyle="Italic" Margin="0,0,0,4" TextWrapping="Wrap"/>
                         <TextBlock x:Name="ProfileHint" Text="" FontSize="10" Foreground="#7a6a52" FontStyle="Italic" Margin="0,0,0,10" TextWrapping="Wrap"/>
 
                         <Grid>
